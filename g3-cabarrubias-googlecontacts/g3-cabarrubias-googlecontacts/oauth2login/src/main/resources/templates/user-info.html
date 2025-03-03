@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>About Me</title>
+  <style>
+    /* Page styling */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .profile-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 350px;
+    }
+
+    /* Profile image styling */
+    .profile-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #4CAF50;
+      margin-bottom: 15px;
+    }
+
+    /* User info text */
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      margin: 5px 0;
+    }
+
+    /* Button styling */
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      color: white;
+      background: #4CAF50;
+      border-radius: 5px;
+      transition: background 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+<div class="profile-container">
+  <img th:src="${user.picture}" alt="User Profile Picture" class="profile-img"> <!-- Profile Picture -->
+
+  <h1 th:text="${user.name}"></h1>  <!-- Full Name -->
+  <p><strong>First Name:</strong> <span th:text="${user.given_name}"></span></p>
+  <p><strong>Family Name:</strong> <span th:text="${user.family_name}"></span></p>
+  <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+
+  <!-- Redirect Link to Google Contacts -->
+  <a href="/googleuser" class="btn">View Google Contacts</a>
+</div>
+
+</body>
+</html>
