@@ -35,7 +35,7 @@ public class UserController {
     public String getUserInfo(Model model, @AuthenticationPrincipal OAuth2User oAuth2User) {
         System.out.println("User Data: " + oAuth2User.getAttributes());
         model.addAttribute("user", oAuth2User.getAttributes());
-        return "user-info"; // match a Thymeleaf template like `user-info.html`
+        return "user-info"; 
     }
 
 
@@ -127,7 +127,6 @@ public class UserController {
                              OAuth2AuthenticationToken authentication, Model model) {
         String accessToken = getAccessToken(authentication);
 
-        // Google People API endpoint for creating a contact
         String url = "https://people.googleapis.com/v1/people:createContact";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -137,7 +136,6 @@ public class UserController {
 
         String fullName = firstName + " " + lastName;
 
-        // Request body
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("names", List.of(Map.of("givenName", firstName, "familyName", lastName)));        requestBody.put("emailAddresses", List.of(Map.of("value", email)));
         requestBody.put("phoneNumbers", List.of(Map.of("value", phone)));
@@ -151,7 +149,7 @@ public class UserController {
             model.addAttribute("message", "Failed to add contact.");
         }
 
-        return "redirect:/googleuser"; // Redirect to refresh the contact list
+        return "redirect:/googleuser"; 
     }
 
     @GetMapping("/edit-contact")
@@ -161,12 +159,12 @@ public class UserController {
             OAuth2AuthenticationToken authentication,
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
         try {
-            // Fetch OAuth token
+            
             OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                     authentication.getAuthorizedClientRegistrationId(), authentication.getName());
             String accessToken = client.getAccessToken().getTokenValue();
 
-            // Fetch contact details
+            
             String getUrl = "https://people.googleapis.com/v1/" + resourceName + "?personFields=names,emailAddresses,phoneNumbers";
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
@@ -179,15 +177,15 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Contact not found"));
             }
 
-            // Return JSON if it's an AJAX request
+            
             if ("XMLHttpRequest".equals(requestedWith)) {
                 return ResponseEntity.ok(contactData);
             }
 
-            // Otherwise, return the Thymeleaf page
+            
             model.addAttribute("contact", contactData);
             model.addAttribute("resourceName", resourceName);
-            return ResponseEntity.ok().body(contactData); // Can be replaced with a Thymeleaf view if needed.
+            return ResponseEntity.ok().body(contactData); 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -205,7 +203,7 @@ public class UserController {
             String lastName = requestData.getOrDefault("lastName", "").trim();
             String email = requestData.getOrDefault("email", "").trim();
             String phone = requestData.getOrDefault("phone", "").trim();
-            // 🔹 Fetch OAuth Token
+            // Fetch OAuth Token
             OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
                     authentication.getAuthorizedClientRegistrationId(), authentication.getName());
             String accessToken = client.getAccessToken().getTokenValue();
@@ -213,7 +211,7 @@ public class UserController {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(accessToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
-            // 🔹 Fetch Contact to get etag
+            // Fetch Contact to get etag
             String getUrl = "https://people.googleapis.com/v1/" + resourceName + "?personFields=metadata";
             HttpEntity<Void> getRequest = new HttpEntity<>(headers);
             ResponseEntity<Map> getResponse = restTemplate.exchange(getUrl, HttpMethod.GET, getRequest, Map.class);
@@ -222,7 +220,7 @@ public class UserController {
                 return ResponseEntity.badRequest().body("Error: Contact etag is missing.");
             }
             String etag = (String) contactData.get("etag");
-            // 🔹 Construct Request Body
+            // Construct Request Body
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("etag", etag);
             List<Map<String, String>> names = new ArrayList<>();
@@ -243,7 +241,7 @@ public class UserController {
             if (!names.isEmpty()) requestBody.put("names", names);
             if (!emails.isEmpty()) requestBody.put("emailAddresses", emails);
             if (!phones.isEmpty()) requestBody.put("phoneNumbers", phones);
-            // 🔹 Send "PATCH" Request (Using POST Override)
+            // Send "PATCH" Request (Using POST Override)
             String patchUrl = "https://people.googleapis.com/v1/" + resourceName + ":updateContact?updatePersonFields=names,emailAddresses,phoneNumbers";
             headers.set("X-HTTP-Method-Override", "PATCH");
             HttpEntity<Map<String, Object>> patchRequest = new HttpEntity<>(requestBody, headers);

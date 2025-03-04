@@ -72,7 +72,6 @@
             background-color: #45a049;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -131,7 +130,6 @@
             background-color: #45a049;
         }
 
-        /* Delete Modal Styles */
         .delete-modal {
             text-align: center;
             padding: 25px;
@@ -325,7 +323,6 @@
                 if (response.ok) {
                     showToast("Contact added successfully");
 
-                    // Hide modal after success
                     closeAddModal();
 
                     // Refresh the page after a short delay so the new contact appears
@@ -342,10 +339,19 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById("resourceName").value = resourceName;
-                document.getElementById("editFirstName").value = data.names[0]?.givenName || '';
-                document.getElementById("editLastName").value = data.names[0]?.familyName || '';
-                document.getElementById("editEmail").value = data.emailAddresses[0]?.value || '';
-                document.getElementById("editPhone").value = data.phoneNumbers[0]?.value || '';
+
+                const names = data.names?.[0] || {};
+                const emails = data.emailAddresses?.[0] || {};
+                const phones = data.phoneNumbers?.[0] || {};
+
+                document.getElementById("editFirstName").value = names.givenName || '';
+                document.getElementById("editLastName").value = names.familyName || '';
+                document.getElementById("editEmail").value = emails.value || '';
+
+                
+                const phoneValue = phones.value || '';
+                document.getElementById("editPhone").value = phoneValue.match(/^\+?\d+$/) ? phoneValue : '';
+
                 document.getElementById("editModal").style.display = "flex";
             })
             .catch(error => showToast("Error fetching contact", true));
@@ -371,7 +377,7 @@
                 if (response.ok) {
                     showToast("Contact updated successfully");
 
-                    // **Update the UI dynamically**
+                    
                     let row = document.querySelector(`tr[data-resource-name="${resourceName}"]`);
                     if (row) {
                         row.querySelector(".contact-name").textContent = `${firstName} ${lastName}`;
@@ -379,7 +385,7 @@
                         row.querySelector(".contact-phone").textContent = phone;
                     }
 
-                    closeEditModal(); // Close modal after successful update
+                    closeEditModal(); 
                 } else {
                     return response.text().then(text => showToast(text, true));
                 }
@@ -409,12 +415,10 @@
                 if (response.ok) {
                     showToast("Contact deleted successfully");
 
-                    // Remove the row from the table dynamically
                     const contactRow = document.querySelector(`tr[data-resource-name="${resourceName}"]`);
                     if (contactRow) {
                         contactRow.remove();
 
-                        // Update the contact count dynamically
                         const contactCountElement = document.querySelector("h1 span");
                         let currentCount = parseInt(contactCountElement.textContent, 10);
                         contactCountElement.textContent = currentCount - 1;
